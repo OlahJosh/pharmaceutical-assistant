@@ -41,6 +41,140 @@ export const defaultResearchPapers = [
   { id: "40", title: "Circular RNA Therapeutics: A New Modality Emerges", authors: "Wesselhoeft et al.", journal: "Nature Biotechnology", date: "Nov 2024", citations: 67, abstract: "Engineering circular RNAs for enhanced stability and translation in therapeutic applications...", keywords: ["circRNA", "RNA Therapeutics", "Gene Expression", "Drug Development"], trending: false, link: "https://www.nature.com/nbt/" },
 ];
 
+// Default clinical trials data
+export const defaultTrials = [
+  {
+    id: "NCT05580562",
+    title: "A Study of Pembrolizumab Plus Lenvatinib Versus Chemotherapy for Endometrial Carcinoma",
+    sponsor: "Merck Sharp & Dohme LLC",
+    phase: "Phase III",
+    status: "Active",
+    indication: "Endometrial Carcinoma",
+    primaryEndpoint: "Progression-Free Survival (PFS)",
+    secondaryEndpoints: ["Overall Survival", "Objective Response Rate", "Duration of Response"],
+    enrollment: 875,
+    startDate: "October 2022",
+    completionDate: "December 2026"
+  },
+  {
+    id: "NCT04379596",
+    title: "Trastuzumab Deruxtecan in HER2-Low Breast Cancer (DESTINY-Breast04)",
+    sponsor: "Daiichi Sankyo",
+    phase: "Phase III",
+    status: "Completed",
+    indication: "HER2-Low Breast Cancer",
+    primaryEndpoint: "Progression-Free Survival in HR+ Cohort",
+    secondaryEndpoints: ["Overall Survival", "ORR", "Safety Profile"],
+    enrollment: 557,
+    startDate: "January 2020",
+    completionDate: "June 2024"
+  },
+  {
+    id: "NCT04819178",
+    title: "Sacituzumab Govitecan vs Treatment of Physician's Choice in HR+/HER2- Breast Cancer",
+    sponsor: "Gilead Sciences",
+    phase: "Phase III",
+    status: "Recruiting",
+    indication: "HR+/HER2- Metastatic Breast Cancer",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "Clinical Benefit Rate", "Quality of Life"],
+    enrollment: 650,
+    startDate: "March 2021",
+    completionDate: "September 2025"
+  },
+  {
+    id: "NCT05629585",
+    title: "Oral SERD Elacestrant in ER+/HER2- Advanced Breast Cancer (EMERALD)",
+    sponsor: "Stemline Therapeutics",
+    phase: "Phase III",
+    status: "Active",
+    indication: "ER+/HER2- Advanced Breast Cancer",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "ORR", "Time to Response"],
+    enrollment: 478,
+    startDate: "November 2022",
+    completionDate: "March 2026"
+  },
+  {
+    id: "NCT04072952",
+    title: "Sotorasib in KRAS G12C Mutated Non-Small Cell Lung Cancer (CodeBreaK 200)",
+    sponsor: "Amgen",
+    phase: "Phase III",
+    status: "Completed",
+    indication: "KRAS G12C-Mutated NSCLC",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "Objective Response Rate", "Disease Control Rate"],
+    enrollment: 345,
+    startDate: "August 2020",
+    completionDate: "February 2024"
+  },
+  {
+    id: "NCT04538378",
+    title: "Durvalumab Plus Tremelimumab in Hepatocellular Carcinoma (HIMALAYA)",
+    sponsor: "AstraZeneca",
+    phase: "Phase III",
+    status: "Active",
+    indication: "Unresectable Hepatocellular Carcinoma",
+    primaryEndpoint: "Overall Survival",
+    secondaryEndpoints: ["PFS", "ORR", "Duration of Response", "Time to Progression"],
+    enrollment: 1171,
+    startDate: "September 2020",
+    completionDate: "August 2025"
+  },
+  {
+    id: "NCT05194995",
+    title: "Atezolizumab Plus Cabozantinib in Advanced Renal Cell Carcinoma",
+    sponsor: "Roche",
+    phase: "Phase III",
+    status: "Recruiting",
+    indication: "Advanced Renal Cell Carcinoma",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "ORR", "Safety"],
+    enrollment: 520,
+    startDate: "January 2022",
+    completionDate: "June 2026"
+  },
+  {
+    id: "NCT04887870",
+    title: "Zolbetuximab in CLDN18.2+ Gastric/GEJ Adenocarcinoma (SPOTLIGHT)",
+    sponsor: "Astellas Pharma",
+    phase: "Phase III",
+    status: "Active",
+    indication: "Gastric/GEJ Adenocarcinoma",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "ORR", "Quality of Life"],
+    enrollment: 565,
+    startDate: "May 2021",
+    completionDate: "December 2025"
+  },
+  {
+    id: "NCT04821622",
+    title: "Tislelizumab in First-Line Esophageal Squamous Cell Carcinoma (RATIONALE 306)",
+    sponsor: "BeiGene",
+    phase: "Phase III",
+    status: "Active",
+    indication: "Esophageal Squamous Cell Carcinoma",
+    primaryEndpoint: "Overall Survival",
+    secondaryEndpoints: ["PFS", "ORR", "Duration of Response"],
+    enrollment: 649,
+    startDate: "March 2021",
+    completionDate: "November 2025"
+  },
+  {
+    id: "NCT05514054",
+    title: "Dato-DXd in HR+/HER2-Low or HER2-Ultralow Breast Cancer (TROPION-Breast02)",
+    sponsor: "AstraZeneca",
+    phase: "Phase III",
+    status: "Recruiting",
+    indication: "HR+/HER2-Low Breast Cancer",
+    primaryEndpoint: "Progression-Free Survival",
+    secondaryEndpoints: ["Overall Survival", "ORR", "Clinical Benefit Rate", "Safety"],
+    enrollment: 700,
+    startDate: "August 2022",
+    completionDate: "April 2027"
+  }
+];
+
 export const defaultTrendingKeywords = [
   { keyword: "mRNA Therapeutics", count: 234, change: "+23%" },
   { keyword: "CAR-T Cells", count: 189, change: "+18%" },

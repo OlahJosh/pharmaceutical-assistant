@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { defaultTrials } from "@/data/default-data";
 
 export interface Trial {
   id: string;
@@ -34,7 +35,7 @@ interface ComparisonData {
 }
 
 export function useTrials() {
-  const [trialsData, setTrialsData] = useState<TrialsData | null>(null);
+  const [trialsData, setTrialsData] = useState<TrialsData>({ trials: defaultTrials });
   const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
@@ -47,10 +48,16 @@ export function useTrials() {
 
       if (error) throw error;
 
-      setTrialsData(responseData);
+      // Merge new trials with existing, avoiding duplicates
+      setTrialsData((prev) => {
+        const existingIds = new Set(prev.trials.map(t => t.id));
+        const newTrials = responseData.trials?.filter((t: Trial) => !existingIds.has(t.id)) || [];
+        return { trials: [...prev.trials, ...newTrials] };
+      });
+      
       toast({
         title: "Trials Updated",
-        description: `Loaded ${responseData.trials?.length || 0} clinical trials`,
+        description: `Added ${responseData.trials?.length || 0} new clinical trials`,
       });
     } catch (error) {
       console.error("Error fetching trials:", error);
