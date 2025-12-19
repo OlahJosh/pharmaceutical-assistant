@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { X, AlertCircle, TrendingUp, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,60 +8,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useNotifications, Notification } from "@/hooks/use-notifications";
 
 interface NotificationsPanelProps {
   open: boolean;
   onClose: () => void;
   onMarkAllRead: () => void;
 }
-
-const notifications = [
-  {
-    id: 1,
-    type: "alert",
-    title: "FDA Guidance Update",
-    description: "New guidance on CAR-T cell therapy clinical trials published",
-    time: "5 min ago",
-    unread: true,
-    agent: "Regulatory",
-  },
-  {
-    id: 2,
-    type: "insight",
-    title: "Research Trend Detected",
-    description: "15% increase in mRNA vaccine publications this month",
-    time: "1 hour ago",
-    unread: true,
-    agent: "Research",
-  },
-  {
-    id: 3,
-    type: "trial",
-    title: "Trial Status Change",
-    description: "NCT04512345 moved to Phase III recruitment",
-    time: "3 hours ago",
-    unread: true,
-    agent: "Clinical",
-  },
-  {
-    id: 4,
-    type: "system",
-    title: "Weekly Report Ready",
-    description: "Your pipeline intelligence report is ready for review",
-    time: "Yesterday",
-    unread: false,
-    agent: "Orchestrator",
-  },
-  {
-    id: 5,
-    type: "alert",
-    title: "GMP Compliance Reminder",
-    description: "Quarterly compliance review due in 7 days",
-    time: "2 days ago",
-    unread: false,
-    agent: "Regulatory",
-  },
-];
 
 const getIcon = (type: string) => {
   switch (type) {
@@ -91,12 +43,9 @@ const getAgentBadgeClass = (agent: string) => {
 };
 
 export default function NotificationsPanel({ open, onClose, onMarkAllRead }: NotificationsPanelProps) {
-  const [notificationList, setNotificationList] = useState(notifications);
-  
-  const unreadCount = notificationList.filter(n => n.unread).length;
+  const { notifications, unreadCount } = useNotifications();
 
   const handleMarkAllRead = () => {
-    setNotificationList(prev => prev.map(n => ({ ...n, unread: false })));
     onMarkAllRead();
     onClose();
   };
@@ -117,7 +66,7 @@ export default function NotificationsPanel({ open, onClose, onMarkAllRead }: Not
 
         <ScrollArea className="h-[calc(100vh-120px)]">
           <div className="space-y-3 pr-4">
-            {notificationList.map((notification) => (
+            {notifications.map((notification) => (
               <div
                 key={notification.id}
                 className={`group relative rounded-lg border p-4 transition-colors ${
