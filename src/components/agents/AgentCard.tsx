@@ -61,7 +61,7 @@ export default function AgentCard({
 
   return (
     <div
-      className={`glass-card group relative overflow-hidden p-6 transition-all duration-300 hover:border-border ${className}`}
+      className={`glass-card group relative overflow-hidden p-6 transition-all duration-300 hover:border-border hover-lift hover-glow ${className}`}
     >
       {/* Subtle glow effect */}
       <div
@@ -72,7 +72,7 @@ export default function AgentCard({
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.border} border`}
+            className={`flex h-12 w-12 items-center justify-center rounded-xl ${colors.bg} ${colors.border} border transition-transform duration-300 group-hover:scale-110`}
           >
             <span className={colors.text}>{icon}</span>
           </div>

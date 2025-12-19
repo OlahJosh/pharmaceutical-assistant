@@ -100,14 +100,14 @@ export default function Research() {
 
       <main className="container mx-auto px-4 pb-12 pt-24">
         {/* Page Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-in-up">
           <div>
             <h1 className="font-display text-3xl font-bold">Research Intelligence</h1>
             <p className="text-muted-foreground">
               AI-powered research monitoring across 47 journals
             </p>
           </div>
-          <Badge className="w-fit agent-badge-research border">
+          <Badge className="w-fit agent-badge-research border animate-pulse-subtle">
             <Search className="mr-1.5 h-3.5 w-3.5" />
             Research Agent Active
           </Badge>
@@ -145,9 +145,9 @@ export default function Research() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Papers List */}
           <div className="space-y-4 lg:col-span-2">
-            <h2 className="font-display text-xl font-semibold">Recent Publications</h2>
-            {researchPapers.map((paper) => (
-              <Card key={paper.id} className="glass-card p-6 transition-all hover:border-border">
+            <h2 className="font-display text-xl font-semibold animate-fade-in">Recent Publications</h2>
+            {researchPapers.map((paper, index) => (
+              <Card key={paper.id} className={`glass-card p-6 transition-all hover:border-border hover-lift animate-fade-in-up stagger-${Math.min(index + 1, 5)}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 space-y-3">
                     <div className="flex items-start gap-2">
@@ -194,14 +194,14 @@ export default function Research() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* AI Insights */}
-            <Card className="glass-card p-6">
+            <Card className="glass-card p-6 animate-fade-in-right stagger-1 hover-glow">
               <div className="mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
+                <Sparkles className="h-5 w-5 text-primary animate-pulse-subtle" />
                 <h3 className="font-display text-lg font-semibold">AI Insights</h3>
               </div>
               <div className="space-y-4">
                 {aiInsights.map((insight, index) => (
-                  <div key={index} className="border-l-2 border-primary/50 pl-3">
+                  <div key={index} className="border-l-2 border-primary/50 pl-3 hover:border-primary transition-colors">
                     <p className="text-sm text-muted-foreground">{insight}</p>
                   </div>
                 ))}
@@ -209,16 +209,16 @@ export default function Research() {
             </Card>
 
             {/* Trending Keywords */}
-            <Card className="glass-card p-6">
+            <Card className="glass-card p-6 animate-fade-in-right stagger-2 hover-glow">
               <div className="mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
                 <h3 className="font-display text-lg font-semibold">Trending Keywords</h3>
               </div>
               <div className="space-y-3">
-                {trendingKeywords.map((item) => (
+                {trendingKeywords.map((item, index) => (
                   <div
                     key={item.keyword}
-                    className="flex items-center justify-between rounded-lg bg-secondary/30 p-3"
+                    className={`flex items-center justify-between rounded-lg bg-secondary/30 p-3 hover-scale cursor-pointer animate-fade-in-up stagger-${Math.min(index + 1, 5)}`}
                   >
                     <div>
                       <p className="text-sm font-medium">{item.keyword}</p>
@@ -233,7 +233,7 @@ export default function Research() {
             </Card>
 
             {/* Sources */}
-            <Card className="glass-card p-6">
+            <Card className="glass-card p-6 animate-fade-in-right stagger-3 hover-glow">
               <div className="mb-4 flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
                 <h3 className="font-display text-lg font-semibold">Monitored Sources</h3>
