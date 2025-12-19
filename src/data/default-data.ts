@@ -55,6 +55,24 @@ export const defaultAiInsights = [
   "Cross-referencing with clinical trial data suggests a 6-month lag between publication peaks and trial initiations in gene therapy space.",
 ];
 
+export const defaultRegulatoryUpdates = [
+  { id: "1", title: "FDA Updates CAR-T Manufacturing Guidelines", agency: "FDA", date: "Dec 15, 2024", priority: "high" as const, summary: "New quality control requirements for viral vector production in CAR-T cell therapies" },
+  { id: "2", title: "EMA Revises Clinical Trial Application Process", agency: "EMA", date: "Dec 12, 2024", priority: "medium" as const, summary: "Streamlined submission pathway for first-in-human studies with enhanced safety monitoring" },
+  { id: "3", title: "ICH E6(R3) GCP Guidelines Published", agency: "ICH", date: "Dec 10, 2024", priority: "high" as const, summary: "Major revision to Good Clinical Practice guidelines with focus on risk-based monitoring" },
+  { id: "4", title: "PMDA Announces New Accelerated Approval Criteria", agency: "PMDA", date: "Dec 8, 2024", priority: "medium" as const, summary: "Japan expands conditional approval pathway for breakthrough therapies" },
+  { id: "5", title: "FDA Issues Draft Guidance on AI in Drug Development", agency: "FDA", date: "Dec 5, 2024", priority: "high" as const, summary: "Framework for use of artificial intelligence and machine learning in drug discovery and clinical trials" },
+  { id: "6", title: "EMA Updates Biosimilar Approval Requirements", agency: "EMA", date: "Dec 3, 2024", priority: "medium" as const, summary: "Revised guidance on analytical similarity and clinical trial requirements for biosimilars" },
+  { id: "7", title: "Health Canada Introduces Agile Regulatory Pathway", agency: "HC", date: "Nov 28, 2024", priority: "medium" as const, summary: "New flexible framework for advanced therapy medicinal products including gene therapies" },
+  { id: "8", title: "FDA Final Rule on Electronic Records and Signatures", agency: "FDA", date: "Nov 25, 2024", priority: "high" as const, summary: "Updated 21 CFR Part 11 requirements for electronic systems in pharmaceutical manufacturing" },
+  { id: "9", title: "WHO Publishes mRNA Vaccine Guidelines", agency: "WHO", date: "Nov 22, 2024", priority: "high" as const, summary: "Global standards for quality, safety, and efficacy of mRNA-based vaccines and therapeutics" },
+  { id: "10", title: "EMA Guidance on Real-World Evidence", agency: "EMA", date: "Nov 20, 2024", priority: "medium" as const, summary: "Framework for incorporating RWE in regulatory decision-making and label extensions" },
+  { id: "11", title: "FDA Updates Orphan Drug Designation Criteria", agency: "FDA", date: "Nov 18, 2024", priority: "medium" as const, summary: "Clarifications on prevalence calculations and scientific rationale requirements" },
+  { id: "12", title: "ICH Q12 Implementation Guidelines", agency: "ICH", date: "Nov 15, 2024", priority: "high" as const, summary: "Technical and regulatory considerations for pharmaceutical product lifecycle management" },
+  { id: "13", title: "MHRA Post-Brexit Regulatory Updates", agency: "MHRA", date: "Nov 12, 2024", priority: "medium" as const, summary: "UK regulatory independence framework and mutual recognition agreements" },
+  { id: "14", title: "FDA REMS Modification Guidance", agency: "FDA", date: "Nov 10, 2024", priority: "medium" as const, summary: "Updated requirements for Risk Evaluation and Mitigation Strategies modifications" },
+  { id: "15", title: "EMA Pediatric Investigation Plans Update", agency: "EMA", date: "Nov 8, 2024", priority: "high" as const, summary: "Revised timelines and requirements for pediatric development programs" },
+];
+
 export const defaultInsightsData = {
   researchInsights: [
     { title: "mRNA Platform Expansion", summary: "mRNA therapeutics research has increased 23% with focus on oncology and rare disease applications beyond vaccines", impact: "high" as const, category: "research" },

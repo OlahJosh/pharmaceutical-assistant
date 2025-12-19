@@ -82,26 +82,8 @@ export default function Header() {
             {/* Right Actions */}
             <div className="flex items-center gap-2">
               {/* Language Selector */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hidden sm:flex">
-                    <Globe className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  <DropdownMenuLabel>Language</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {languages.map((lang) => (
-                    <DropdownMenuItem
-                      key={lang.code}
-                      onClick={() => handleLanguageChange(lang.code, lang.label)}
-                      className={currentLang === lang.code ? "bg-secondary" : ""}
-                    >
-                      {lang.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Google Translate Widget */}
+              <div id="google_translate_element" className="hidden sm:block"></div>
 
               {/* Notifications */}
               <Button
