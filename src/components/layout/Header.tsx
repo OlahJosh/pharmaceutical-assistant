@@ -20,6 +20,7 @@ const navLinks = [
   { path: "/research", label: "Research" },
   { path: "/trials", label: "Trials" },
   { path: "/regulatory", label: "Regulatory" },
+  { path: "/insights", label: "Insights" },
 ];
 
 const languages = [
