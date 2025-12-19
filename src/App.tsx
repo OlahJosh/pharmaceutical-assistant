@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Research from "./pages/Research";
 import Trials from "./pages/Trials";
 import Regulatory from "./pages/Regulatory";
+import Insights from "./pages/Insights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/research" element={<Research />} />
             <Route path="/trials" element={<Trials />} />
             <Route path="/regulatory" element={<Regulatory />} />
+            <Route path="/insights" element={<Insights />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

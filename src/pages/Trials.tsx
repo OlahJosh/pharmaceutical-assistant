@@ -1,16 +1,10 @@
-import { useState } from "react";
-import { FileText, Plus, X, Sparkles, ExternalLink, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Plus, X, Sparkles, RefreshCw, Loader2, ArrowRight, AlertTriangle, CheckCircle, Target } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -19,61 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const trialsData = [
-  {
-    id: "NCT04512345",
-    title: "Phase III Study of XYZ-101 in Advanced NSCLC",
-    sponsor: "BioGenex Therapeutics",
-    phase: "Phase III",
-    status: "Recruiting",
-    indication: "Non-Small Cell Lung Cancer",
-    primaryEndpoint: "Overall Survival (OS)",
-    secondaryEndpoints: ["PFS", "ORR", "DOR", "Safety"],
-    enrollment: 450,
-    startDate: "Jan 2024",
-    completionDate: "Dec 2026",
-  },
-  {
-    id: "NCT04678901",
-    title: "Phase II Basket Trial of ABC-202 in Solid Tumors",
-    sponsor: "Oncology Partners Inc.",
-    phase: "Phase II",
-    status: "Active",
-    indication: "Multiple Solid Tumors",
-    primaryEndpoint: "Objective Response Rate (ORR)",
-    secondaryEndpoints: ["PFS", "DCR", "Safety", "PK/PD"],
-    enrollment: 180,
-    startDate: "Mar 2023",
-    completionDate: "Sep 2025",
-  },
-  {
-    id: "NCT04234567",
-    title: "Phase I/II First-in-Human Study of DEF-303",
-    sponsor: "NovaTech Pharma",
-    phase: "Phase I/II",
-    status: "Recruiting",
-    indication: "Relapsed/Refractory AML",
-    primaryEndpoint: "MTD and RP2D Determination",
-    secondaryEndpoints: ["ORR", "CR Rate", "MRD Negativity"],
-    enrollment: 90,
-    startDate: "Jun 2024",
-    completionDate: "Jun 2027",
-  },
-  {
-    id: "NCT04890123",
-    title: "Phase III Registrational Study of GHI-404",
-    sponsor: "MediBio Sciences",
-    phase: "Phase III",
-    status: "Completed",
-    indication: "Metastatic Breast Cancer",
-    primaryEndpoint: "Progression-Free Survival (PFS)",
-    secondaryEndpoints: ["OS", "ORR", "QoL", "Safety"],
-    enrollment: 600,
-    startDate: "Aug 2021",
-    completionDate: "Nov 2024",
-  },
-];
+import { useTrials, Trial } from "@/hooks/use-trials";
 
 const phaseColors: Record<string, string> = {
   "Phase I": "bg-purple-500/20 text-purple-400 border-purple-500/30",
@@ -86,18 +26,50 @@ const statusColors: Record<string, string> = {
   Recruiting: "bg-primary/20 text-primary border-primary/30",
   Active: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
   Completed: "bg-muted text-muted-foreground border-border",
+  Suspended: "bg-red-500/20 text-red-400 border-red-500/30",
+};
+
+const insightTypeColors: Record<string, string> = {
+  endpoint: "border-primary/50",
+  competitive: "border-amber-500/50",
+  timeline: "border-purple-500/50",
+  risk: "border-red-500/50",
+  recommendation: "border-emerald-500/50",
+};
+
+const riskScoreColors: Record<string, { bg: string; text: string; icon: any }> = {
+  low: { bg: "bg-emerald-500/20", text: "text-emerald-400", icon: CheckCircle },
+  medium: { bg: "bg-amber-500/20", text: "text-amber-400", icon: Target },
+  high: { bg: "bg-red-500/20", text: "text-red-400", icon: AlertTriangle },
 };
 
 export default function Trials() {
   const [selectedTrials, setSelectedTrials] = useState<string[]>([]);
+  const { trialsData, comparisonData, isLoading, isComparing, fetchTrials, compareTrials } = useTrials();
+
+  useEffect(() => {
+    fetchTrials();
+  }, []);
+
+  const trials = trialsData?.trials || [];
 
   const toggleTrial = (id: string) => {
-    setSelectedTrials((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : prev.length < 3 ? [...prev, id] : prev
-    );
+    setSelectedTrials((prev) => {
+      const newSelection = prev.includes(id) 
+        ? prev.filter((t) => t !== id) 
+        : prev.length < 3 ? [...prev, id] : prev;
+      
+      // Auto-compare when 2+ trials selected
+      if (newSelection.length >= 2) {
+        const selectedTrialData = trials.filter((t) => newSelection.includes(t.id));
+        setTimeout(() => compareTrials(selectedTrialData), 100);
+      }
+      
+      return newSelection;
+    });
   };
 
-  const selectedTrialData = trialsData.filter((t) => selectedTrials.includes(t.id));
+  const selectedTrialData = trials.filter((t) => selectedTrials.includes(t.id));
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,10 +84,26 @@ export default function Trials() {
               Compare trials by phase, endpoints, and outcomes
             </p>
           </div>
-          <Badge className="w-fit agent-badge-clinical border">
-            <FileText className="mr-1.5 h-3.5 w-3.5" />
-            Clinical Agent Active
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => fetchTrials()}
+              disabled={isLoading}
+              className="gap-2"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              Refresh
+            </Button>
+            <Badge className="w-fit agent-badge-clinical border">
+              <FileText className="mr-1.5 h-3.5 w-3.5" />
+              Clinical Agent Active
+            </Badge>
+          </div>
         </div>
 
         {/* Trial Selection */}
@@ -127,35 +115,52 @@ export default function Trials() {
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {trialsData.map((trial) => {
-              const isSelected = selectedTrials.includes(trial.id);
-              return (
-                <button
-                  key={trial.id}
-                  onClick={() => toggleTrial(trial.id)}
-                  className={`rounded-lg border p-4 text-left transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/10"
-                      : "border-border/50 bg-secondary/30 hover:border-border"
-                  }`}
-                >
-                  <div className="mb-2 flex items-start justify-between">
-                    <Badge variant="outline" className={phaseColors[trial.phase]}>
-                      {trial.phase}
-                    </Badge>
-                    {isSelected ? (
-                      <X className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Plus className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-                  <p className="mb-1 text-sm font-medium">{trial.id}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{trial.title}</p>
-                </button>
-              );
-            })}
-          </div>
+          {isLoading ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-28 w-full" />
+              ))}
+            </div>
+          ) : trials.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {trials.map((trial) => {
+                const isSelected = selectedTrials.includes(trial.id);
+                return (
+                  <button
+                    key={trial.id}
+                    onClick={() => toggleTrial(trial.id)}
+                    className={`rounded-lg border p-4 text-left transition-all ${
+                      isSelected
+                        ? "border-primary bg-primary/10"
+                        : "border-border/50 bg-secondary/30 hover:border-border"
+                    }`}
+                  >
+                    <div className="mb-2 flex items-start justify-between">
+                      <Badge variant="outline" className={phaseColors[trial.phase] || phaseColors["Phase II"]}>
+                        {trial.phase}
+                      </Badge>
+                      {isSelected ? (
+                        <X className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Plus className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </div>
+                    <p className="mb-1 text-sm font-medium">{trial.id}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{trial.title}</p>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">Click refresh to load clinical trials</p>
+              <Button onClick={() => fetchTrials()} disabled={isLoading}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Load Trials
+              </Button>
+            </div>
+          )}
         </Card>
 
         {/* Comparison Table */}
@@ -195,7 +200,7 @@ export default function Trials() {
                       <TableCell className="font-medium">Phase</TableCell>
                       {selectedTrialData.map((trial) => (
                         <TableCell key={trial.id}>
-                          <Badge variant="outline" className={phaseColors[trial.phase]}>
+                          <Badge variant="outline" className={phaseColors[trial.phase] || phaseColors["Phase II"]}>
                             {trial.phase}
                           </Badge>
                         </TableCell>
@@ -205,7 +210,7 @@ export default function Trials() {
                       <TableCell className="font-medium">Status</TableCell>
                       {selectedTrialData.map((trial) => (
                         <TableCell key={trial.id}>
-                          <Badge variant="outline" className={statusColors[trial.status]}>
+                          <Badge variant="outline" className={statusColors[trial.status] || statusColors["Active"]}>
                             {trial.status}
                           </Badge>
                         </TableCell>
@@ -264,33 +269,69 @@ export default function Trials() {
 
             {/* AI Insights */}
             <Card className="glass-card p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h3 className="font-display text-lg font-semibold">AI-Generated Comparison Insights</h3>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary animate-pulse-subtle" />
+                  <h3 className="font-display text-lg font-semibold">AI-Generated Comparison Insights</h3>
+                </div>
+                {isComparing && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </div>
+                )}
               </div>
-              <div className="space-y-4">
-                <div className="border-l-2 border-primary/50 pl-4">
-                  <p className="mb-1 font-medium">Endpoint Alignment</p>
-                  <p className="text-sm text-muted-foreground">
-                    The selected trials show convergence on survival-based endpoints (OS/PFS), 
-                    indicating industry alignment with regulatory preferences for hard clinical outcomes.
-                  </p>
+
+              {isComparing ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
                 </div>
-                <div className="border-l-2 border-amber-500/50 pl-4">
-                  <p className="mb-1 font-medium">Competitive Positioning</p>
-                  <p className="text-sm text-muted-foreground">
-                    Phase III trials in this comparison target similar patient populations, 
-                    suggesting potential market overlap and competitive pressure on enrollment timelines.
-                  </p>
+              ) : comparisonData ? (
+                <div className="space-y-6">
+                  {/* Risk Score & Recommendation */}
+                  {comparisonData.riskScore && (
+                    <div className={`flex items-center gap-3 p-4 rounded-lg ${riskScoreColors[comparisonData.riskScore]?.bg || "bg-secondary/30"}`}>
+                      {(() => {
+                        const RiskIcon = riskScoreColors[comparisonData.riskScore]?.icon || Target;
+                        return <RiskIcon className={`h-5 w-5 ${riskScoreColors[comparisonData.riskScore]?.text || "text-muted-foreground"}`} />;
+                      })()}
+                      <div>
+                        <p className="font-medium">Risk Assessment: <span className="capitalize">{comparisonData.riskScore}</span></p>
+                        <p className="text-sm text-muted-foreground">{comparisonData.recommendation}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Insights */}
+                  <div className="space-y-4">
+                    {comparisonData.insights?.map((insight, index) => (
+                      <div key={index} className={`border-l-2 ${insightTypeColors[insight.type] || "border-primary/50"} pl-4`}>
+                        <p className="mb-1 font-medium">{insight.title}</p>
+                        <p className="text-sm text-muted-foreground">{insight.content}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Competitive Analysis */}
+                  {comparisonData.competitiveAnalysis && (
+                    <div className="border-t border-border/50 pt-4">
+                      <p className="font-medium mb-2">Competitive Landscape</p>
+                      <p className="text-sm text-muted-foreground">{comparisonData.competitiveAnalysis}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="border-l-2 border-purple-500/50 pl-4">
-                  <p className="mb-1 font-medium">Timeline Risk</p>
-                  <p className="text-sm text-muted-foreground">
-                    Based on historical data, Phase III trials in oncology have a 23% probability 
-                    of timeline extension. Consider this in competitive landscape planning.
-                  </p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="border-l-2 border-primary/50 pl-4">
+                    <p className="mb-1 font-medium">Endpoint Alignment</p>
+                    <p className="text-sm text-muted-foreground">
+                      Select trials to generate AI-powered comparison insights.
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </Card>
           </div>
         ) : (

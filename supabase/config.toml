@@ -1,1 +1,16 @@
 project_id = "jdpecrbyfgduendbhxqb"
+
+[functions.regulatory-chat]
+verify_jwt = false
+
+[functions.fetch-research]
+verify_jwt = false
+
+[functions.fetch-trials]
+verify_jwt = false
+
+[functions.compare-trials]
+verify_jwt = false
+
+[functions.aggregate-insights]
+verify_jwt = false
