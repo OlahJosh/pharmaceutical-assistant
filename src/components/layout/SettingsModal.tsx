@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Bell, Shield, Palette, Sun, Moon, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/use-theme";
+import { useProfile } from "@/hooks/use-profile";
 
 interface SettingsModalProps {
   open: boolean;
@@ -29,14 +30,40 @@ interface SettingsModalProps {
 export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { profile, updateProfile } = useProfile();
+  
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(true);
+  const [defaultView, setDefaultView] = useState("overview");
+  const [refreshInterval, setRefreshInterval] = useState("30");
 
-  const handleSave = () => {
-    toast({
-      title: "Settings Saved",
-      description: "Your preferences have been updated successfully.",
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || "");
+      setLastName(profile.last_name || "");
+      setEmail(profile.email || "");
+      setEmailNotifications(profile.email_notifications);
+      setAlertsEnabled(profile.alerts_enabled);
+      setWeeklyDigest(profile.weekly_digest);
+      setDefaultView(profile.default_view || "overview");
+      setRefreshInterval(String(profile.refresh_interval || 30));
+    }
+  }, [profile]);
+
+  const handleSave = async () => {
+    await updateProfile({
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      email_notifications: emailNotifications,
+      alerts_enabled: alertsEnabled,
+      weekly_digest: weeklyDigest,
+      default_view: defaultView,
+      refresh_interval: parseInt(refreshInterval),
     });
     onClose();
   };
@@ -82,19 +109,19 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="Sarah" />
+                <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Chen" />
+                <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="s.chen@pharmalens.io" />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Input id="role" defaultValue="Research Director" disabled />
+                <Input id="role" defaultValue={profile?.role || "User"} disabled />
               </div>
             </div>
           </TabsContent>

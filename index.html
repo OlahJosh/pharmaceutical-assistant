@@ -20,6 +20,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Theme initialization script - prevents flash of wrong theme -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('pharmalens-theme') || 'light';
+        if (theme === 'system') {
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.classList.add(systemTheme);
+        } else {
+          document.documentElement.classList.add(theme);
+        }
+      })();
+    </script>
   </head>
 
   <body>

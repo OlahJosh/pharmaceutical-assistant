@@ -14,15 +14,12 @@ import {
 } from "@/components/ui/select";
 import { useResearch } from "@/hooks/use-research";
 import { Skeleton } from "@/components/ui/skeleton";
+import { defaultResearchPapers, defaultTrendingKeywords, defaultAiInsights } from "@/data/default-data";
 
 export default function Research() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJournal, setSelectedJournal] = useState("all");
   const { data, isLoading, fetchResearch } = useResearch();
-
-  useEffect(() => {
-    fetchResearch();
-  }, []);
 
   const handleRefresh = () => {
     fetchResearch(searchQuery || undefined);
@@ -34,10 +31,11 @@ export default function Research() {
     }
   };
 
-  const filteredPapers = useMemo(() => {
-    if (!data?.papers) return [];
+  // Use fetched data if available, otherwise use defaults
+  const papers = useMemo(() => {
+    const sourcePapers = data?.papers?.length ? data.papers : defaultResearchPapers;
     
-    return data.papers.filter(paper => {
+    return sourcePapers.filter(paper => {
       const matchesSearch = !searchQuery || 
         paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         paper.authors.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -50,9 +48,8 @@ export default function Research() {
     });
   }, [data?.papers, searchQuery, selectedJournal]);
 
-  const papers = filteredPapers;
-  const trendingKeywords = data?.trendingKeywords || [];
-  const aiInsights = data?.insights || [];
+  const trendingKeywords = data?.trendingKeywords?.length ? data.trendingKeywords : defaultTrendingKeywords;
+  const aiInsights = data?.insights?.length ? data.insights : defaultAiInsights;
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,6 +109,8 @@ export default function Research() {
               <SelectItem value="cell">Cell</SelectItem>
               <SelectItem value="lancet">The Lancet</SelectItem>
               <SelectItem value="nejm">NEJM</SelectItem>
+              <SelectItem value="blood">Blood</SelectItem>
+              <SelectItem value="jco">J Clinical Oncology</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" className="gap-2" onClick={handleSearch}>
@@ -123,7 +122,10 @@ export default function Research() {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Papers List */}
           <div className="space-y-4 lg:col-span-2">
-            <h2 className="font-display text-xl font-semibold animate-fade-in">Recent Publications</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl font-semibold animate-fade-in">Recent Publications</h2>
+              <Badge variant="secondary">{papers.length} papers</Badge>
+            </div>
             
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
@@ -137,8 +139,8 @@ export default function Research() {
                   </div>
                 </Card>
               ))
-            ) : papers.length > 0 ? (
-              papers.map((paper, index) => (
+            ) : (
+              papers.slice(0, 20).map((paper, index) => (
                 <Card key={paper.id} className={`glass-card p-6 transition-all hover:border-border hover-lift animate-fade-in-up stagger-${Math.min(index + 1, 5)}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 space-y-3">
@@ -167,7 +169,7 @@ export default function Research() {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {paper.keywords.map((keyword) => (
-                          <Badge key={keyword} variant="secondary" className="text-xs">
+                          <Badge key={keyword} variant="secondary" className="text-xs cursor-pointer hover:bg-primary/20" onClick={() => setSearchQuery(keyword)}>
                             {keyword}
                           </Badge>
                         ))}
@@ -181,16 +183,6 @@ export default function Research() {
                   </div>
                 </Card>
               ))
-            ) : (
-              <Card className="glass-card p-12 text-center">
-                <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-display text-xl font-semibold mb-2">No Papers Found</h3>
-                <p className="text-muted-foreground mb-4">Click refresh to load real-time research data</p>
-                <Button onClick={handleRefresh} disabled={isLoading}>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Load Research
-                </Button>
-              </Card>
             )}
           </div>
 
@@ -207,14 +199,12 @@ export default function Research() {
                   Array.from({ length: 3 }).map((_, i) => (
                     <Skeleton key={i} className="h-16 w-full" />
                   ))
-                ) : aiInsights.length > 0 ? (
+                ) : (
                   aiInsights.map((insight, index) => (
                     <div key={index} className="border-l-2 border-primary/50 pl-3 hover:border-primary transition-colors">
                       <p className="text-sm text-muted-foreground">{insight}</p>
                     </div>
                   ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">Click refresh to generate insights</p>
                 )}
               </div>
             </Card>
@@ -230,14 +220,13 @@ export default function Research() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-14 w-full" />
                   ))
-                ) : trendingKeywords.length > 0 ? (
+                ) : (
                   trendingKeywords.map((item, index) => (
                     <div
                       key={item.keyword}
                       className={`flex items-center justify-between rounded-lg bg-secondary/30 p-3 hover-scale cursor-pointer animate-fade-in-up stagger-${Math.min(index + 1, 5)}`}
                       onClick={() => {
                         setSearchQuery(item.keyword);
-                        fetchResearch(item.keyword);
                       }}
                     >
                       <div>
@@ -249,8 +238,6 @@ export default function Research() {
                       </Badge>
                     </div>
                   ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">No trending keywords yet</p>
                 )}
               </div>
             </Card>
