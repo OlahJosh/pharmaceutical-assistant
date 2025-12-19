@@ -94,6 +94,54 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          alerts_enabled: boolean | null
+          created_at: string
+          default_view: string | null
+          email: string | null
+          email_notifications: boolean | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          refresh_interval: number | null
+          role: string | null
+          updated_at: string
+          user_id: string | null
+          weekly_digest: boolean | null
+        }
+        Insert: {
+          alerts_enabled?: boolean | null
+          created_at?: string
+          default_view?: string | null
+          email?: string | null
+          email_notifications?: boolean | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          refresh_interval?: number | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string | null
+          weekly_digest?: boolean | null
+        }
+        Update: {
+          alerts_enabled?: boolean | null
+          created_at?: string
+          default_view?: string | null
+          email?: string | null
+          email_notifications?: boolean | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          refresh_interval?: number | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string | null
+          weekly_digest?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

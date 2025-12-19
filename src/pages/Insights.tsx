@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Sparkles, RefreshCw, Loader2, TrendingUp, FileText, Scale, Target, AlertTriangle, CheckCircle, ArrowRight } from "lucide-react";
+import { Sparkles, RefreshCw, Loader2, TrendingUp, FileText, Scale, Target, ArrowRight } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInsights } from "@/hooks/use-insights";
 import { Link } from "react-router-dom";
+import { defaultInsightsData } from "@/data/default-data";
 
 const impactColors = {
   high: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -21,18 +22,11 @@ const priorityColors = {
   low: "bg-muted text-muted-foreground",
 };
 
-const categoryIcons = {
-  research: TrendingUp,
-  trials: FileText,
-  regulatory: Scale,
-};
-
 export default function Insights() {
-  const { data, isLoading, fetchInsights } = useInsights();
+  const { data: fetchedData, isLoading, fetchInsights } = useInsights();
 
-  useEffect(() => {
-    fetchInsights();
-  }, []);
+  // Use fetched data if available, otherwise use defaults
+  const data = fetchedData || defaultInsightsData;
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,7 +63,7 @@ export default function Insights() {
               <Skeleton key={i} className="h-64" />
             ))}
           </div>
-        ) : data ? (
+        ) : (
           <>
             {/* Domain Insights Grid */}
             <div className="grid gap-6 lg:grid-cols-3 mb-8">
@@ -130,36 +124,31 @@ export default function Insights() {
               <div className="grid gap-6 md:grid-cols-3">
                 <Card className="glass-card p-6">
                   <h4 className="font-semibold mb-3">Top Therapeutic Areas</h4>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {data.marketTrends.topTherapeuticAreas?.map((area, i) => (
-                      <Badge key={i} variant="secondary" className="mr-2">{area}</Badge>
+                      <Badge key={i} variant="secondary">{area}</Badge>
                     ))}
                   </div>
                 </Card>
                 <Card className="glass-card p-6">
                   <h4 className="font-semibold mb-3">Emerging Technologies</h4>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {data.marketTrends.emergingTechnologies?.map((tech, i) => (
-                      <Badge key={i} variant="outline" className="mr-2 border-primary/30">{tech}</Badge>
+                      <Badge key={i} variant="outline" className="border-primary/30">{tech}</Badge>
                     ))}
                   </div>
                 </Card>
                 <Card className="glass-card p-6">
                   <h4 className="font-semibold mb-3">Key Players</h4>
-                  <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
                     {data.marketTrends.keyPlayers?.map((player, i) => (
-                      <Badge key={i} variant="secondary" className="mr-2">{player}</Badge>
+                      <Badge key={i} variant="secondary">{player}</Badge>
                     ))}
                   </div>
                 </Card>
               </div>
             )}
           </>
-        ) : (
-          <Card className="glass-card p-12 text-center">
-            <Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Click refresh to generate insights</p>
-          </Card>
         )}
       </main>
     </div>
