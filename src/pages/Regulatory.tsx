@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Shield, Send, AlertCircle, CheckCircle, Clock, FileText, Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Shield, AlertCircle, CheckCircle, Clock, FileText, Search, Filter, Globe } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useComplianceItems } from "@/hooks/use-compliance-items";
+import { useChat } from "@/hooks/use-chat";
+import { ChatSidebar } from "@/components/regulatory/ChatSidebar";
+import { ChatMessage } from "@/components/regulatory/ChatMessage";
+import { ChatInput } from "@/components/regulatory/ChatInput";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const regulatoryUpdates = [
   {
@@ -49,98 +57,68 @@ const sampleQuestions = [
   "What are the key differences between FDA and EMA requirements for CAR-T therapies?",
   "Summarize the latest ICH E6(R3) GCP guideline changes",
   "What documentation is required for a Pre-IND meeting?",
+  "Explain 21 CFR Part 211 requirements",
 ];
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
+const agencies = ["All Agencies", "FDA", "EMA", "ICH", "PMDA"];
+const languages = [
+  { code: "en", name: "English" },
+  { code: "es", name: "Español" },
+  { code: "fr", name: "Français" },
+  { code: "de", name: "Deutsch" },
+  { code: "ja", name: "日本語" },
+];
 
 export default function Regulatory() {
   const { items: complianceItems, isLoading: checklistLoading, toggleStatus, completeCount, totalCount } = useComplianceItems();
-  const [query, setQuery] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Hello! I'm your Regulatory & GMP Assistant. Ask me about FDA, EMA, or ICH guidelines, compliance requirements, or any regulatory questions related to drug development.",
-    },
-  ]);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    conversations,
+    currentConversationId,
+    fetchConversations,
+    loadConversation,
+    startNewChat,
+    deleteConversation,
+    clearAllHistory,
+  } = useChat();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAgency, setSelectedAgency] = useState("All Agencies");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
-    const userMessage = query;
-    setQuery("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-    setIsLoading(true);
+  // Fetch conversations on mount
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        "car-t": `**CAR-T Regulatory Comparison: FDA vs EMA**
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-**FDA Requirements:**
-- BLA submission under 21 CFR Part 600
-- CMC section must include detailed manufacturing process
-- Chain of identity documentation required
-- REMS may be required for certain products
-
-**EMA Requirements:**
-- MAA submission with ATMP classification
-- Requires CAT (Committee for Advanced Therapies) review
-- Hospital exemption rules may apply
-- GMP certification from EU-authorized facility
-
-**Key Difference:** EMA's ATMP-specific pathway provides dedicated expertise, while FDA uses standard BLA process with additional guidance documents.`,
-        "ich": `**ICH E6(R3) GCP Guidelines Summary**
-
-**Major Changes:**
-1. **Risk-Based Approach** - Emphasis on quality-by-design and risk proportionate monitoring
-2. **Technology Integration** - Guidelines for electronic systems, eConsent, and decentralized trials
-3. **Data Integrity** - Enhanced requirements for electronic data capture and audit trails
-4. **Participant-Centric** - Greater focus on participant safety and benefit-risk assessment
-
-**Implementation Timeline:**
-- Publication: December 2024
-- Industry adaptation: 18-24 months expected
-- Full enforcement: Phased approach by region`,
-        "pre-ind": `**Pre-IND Meeting Documentation Requirements**
-
-**Required Submissions:**
-1. **Meeting Request Letter** - Type B meeting request with specific objectives
-2. **Briefing Document** - Comprehensive background package (60 days prior)
-3. **Proposed Development Plan** - Clinical and nonclinical strategy
-
-**Briefing Document Sections:**
-- Product description and mechanism of action
-- Nonclinical pharmacology and toxicology summary
-- CMC overview and manufacturing process
-- Proposed clinical protocol outline
-- Specific questions for FDA feedback
-
-**Timeline:** Submit request 90 days before desired meeting date`,
-      };
-
-      let response = "Based on current regulatory guidance, I can provide information on FDA, EMA, and ICH requirements. Could you please specify which aspect of regulatory compliance you'd like me to address?";
-
-      const queryLower = userMessage.toLowerCase();
-      if (queryLower.includes("car-t") || queryLower.includes("differences")) {
-        response = responses["car-t"];
-      } else if (queryLower.includes("ich") || queryLower.includes("gcp") || queryLower.includes("e6")) {
-        response = responses["ich"];
-      } else if (queryLower.includes("pre-ind") || queryLower.includes("documentation")) {
-        response = responses["pre-ind"];
-      }
-
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
-      setIsLoading(false);
-    }, 1500);
-  };
+  // Filter updates based on search and agency
+  const filteredUpdates = regulatoryUpdates.filter((update) => {
+    const matchesSearch = searchQuery === "" || 
+      update.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      update.summary.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAgency = selectedAgency === "All Agencies" || update.agency === selectedAgency;
+    return matchesSearch && matchesAgency;
+  });
 
   const handleQuickQuestion = (question: string) => {
-    setQuery(question);
+    sendMessage(question, []);
+  };
+
+  const handleLanguageChange = (code: string) => {
+    setSelectedLanguage(code);
+    toast({
+      title: "Language Updated",
+      description: `Interface language set to ${languages.find(l => l.code === code)?.name}`,
+    });
   };
 
   return (
@@ -149,102 +127,162 @@ export default function Regulatory() {
 
       <main className="container mx-auto px-4 pb-12 pt-24">
         {/* Page Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fadeInDown">
           <div>
             <h1 className="font-display text-3xl font-bold">Regulatory & Compliance Assistant</h1>
             <p className="text-muted-foreground">
               AI-powered guidance on FDA, EMA, and GMP requirements
             </p>
           </div>
-          <Badge className="w-fit agent-badge-regulatory border">
-            <Shield className="mr-1.5 h-3.5 w-3.5" />
-            Regulatory Agent Active
-          </Badge>
+          <div className="flex items-center gap-3">
+            {/* Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Globe className="h-4 w-4" />
+                  {languages.find(l => l.code === selectedLanguage)?.name}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => handleLanguageChange(lang.code)}
+                    className={selectedLanguage === lang.code ? "bg-primary/20" : ""}
+                  >
+                    {lang.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Badge className="agent-badge-regulatory border">
+              <Shield className="mr-1.5 h-3.5 w-3.5" />
+              Regulatory Agent Active
+            </Badge>
+          </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          {/* Chat Interface */}
-          <div className="lg:col-span-2">
-            <Card className="glass-card flex h-[600px] flex-col overflow-hidden">
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${
-                        message.role === "user" ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg p-4 ${
-                          message.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-secondary"
-                        }`}
-                      >
-                        {message.role === "assistant" && (
-                          <div className="mb-2 flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-rose-400" />
-                            <span className="text-xs font-medium text-rose-400">
-                              Regulatory Agent
-                            </span>
-                          </div>
-                        )}
-                        <div className="whitespace-pre-wrap text-sm">{message.content}</div>
-                      </div>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="rounded-lg bg-secondary p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                          <div className="h-2 w-2 animate-pulse rounded-full bg-primary" style={{ animationDelay: "0.2s" }} />
-                          <div className="h-2 w-2 animate-pulse rounded-full bg-primary" style={{ animationDelay: "0.4s" }} />
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Chat Interface with Sidebar */}
+          <div className="lg:col-span-2 animate-fadeInUp">
+            <Card className="glass-card flex h-[650px] overflow-hidden">
+              {/* Chat History Sidebar */}
+              <ChatSidebar
+                conversations={conversations}
+                currentConversationId={currentConversationId}
+                onSelectConversation={loadConversation}
+                onNewChat={startNewChat}
+                onDeleteConversation={deleteConversation}
+                onClearHistory={clearAllHistory}
+              />
+
+              {/* Main Chat Area */}
+              <div className="flex flex-1 flex-col">
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-4">
+                    {messages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <Shield className="mb-4 h-16 w-16 text-primary/50 animate-float" />
+                        <h3 className="mb-2 font-display text-xl font-semibold">
+                          Welcome to Regulatory Assistant
+                        </h3>
+                        <p className="mb-6 max-w-md text-muted-foreground">
+                          Ask me about FDA, EMA, or ICH guidelines, compliance requirements, 
+                          or upload documents for analysis.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {sampleQuestions.slice(0, 3).map((q, i) => (
+                            <Button
+                              key={i}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs animate-fadeInUp"
+                              style={{ animationDelay: `${i * 0.1}s` }}
+                              onClick={() => handleQuickQuestion(q)}
+                            >
+                              {q.slice(0, 45)}...
+                            </Button>
+                          ))}
                         </div>
                       </div>
+                    ) : (
+                      messages.map((message, index) => (
+                        <ChatMessage key={index} message={message} />
+                      ))
+                    )}
+                    
+                    {isLoading && (
+                      <div className="flex justify-start">
+                        <div className="rounded-lg bg-secondary p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" style={{ animationDelay: "0.2s" }} />
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" style={{ animationDelay: "0.4s" }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+
+                {/* Quick Questions (only show when no messages) */}
+                {messages.length > 0 && (
+                  <div className="border-t border-border/50 p-3">
+                    <div className="flex flex-wrap gap-2">
+                      {sampleQuestions.map((q, i) => (
+                        <Button
+                          key={i}
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => handleQuickQuestion(q)}
+                        >
+                          {q.slice(0, 35)}...
+                        </Button>
+                      ))}
                     </div>
-                  )}
-                </div>
-              </ScrollArea>
+                  </div>
+                )}
 
-              {/* Quick Questions */}
-              <div className="border-t border-border/50 p-3">
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {sampleQuestions.map((q, i) => (
-                    <Button
-                      key={i}
-                      variant="secondary"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => handleQuickQuestion(q)}
-                    >
-                      {q.slice(0, 40)}...
-                    </Button>
-                  ))}
-                </div>
+                {/* Input */}
+                <ChatInput onSend={sendMessage} isLoading={isLoading} />
               </div>
-
-              {/* Input */}
-              <form onSubmit={handleSubmit} className="border-t border-border/50 p-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ask about regulatory requirements, GMP guidelines, or compliance..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="submit" disabled={isLoading}>
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </form>
             </Card>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeInRight">
+            {/* Search and Filter */}
+            <Card className="glass-card p-4">
+              <div className="flex flex-col gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search updates..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Select value={selectedAgency} onValueChange={setSelectedAgency}>
+                  <SelectTrigger>
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Filter by agency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agencies.map((agency) => (
+                      <SelectItem key={agency} value={agency}>
+                        {agency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </Card>
+
             {/* Recent Updates */}
             <Card className="glass-card p-6">
               <div className="mb-4 flex items-center gap-2">
@@ -252,28 +290,34 @@ export default function Regulatory() {
                 <h3 className="font-display text-lg font-semibold">Recent Updates</h3>
               </div>
               <div className="space-y-3">
-                {regulatoryUpdates.map((update) => (
-                  <div
-                    key={update.id}
-                    className="rounded-lg border border-border/50 p-3 transition-colors hover:bg-secondary/30"
-                  >
-                    <div className="mb-1 flex items-start justify-between gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${
-                          update.priority === "high"
-                            ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                            : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                        }`}
-                      >
-                        {update.agency}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{update.date}</span>
+                {filteredUpdates.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No updates match your filters
+                  </p>
+                ) : (
+                  filteredUpdates.map((update) => (
+                    <div
+                      key={update.id}
+                      className="rounded-lg border border-border/50 p-3 transition-colors hover:bg-secondary/30 cursor-pointer"
+                    >
+                      <div className="mb-1 flex items-start justify-between gap-2">
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${
+                            update.priority === "high"
+                              ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                              : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                          }`}
+                        >
+                          {update.agency}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">{update.date}</span>
+                      </div>
+                      <p className="mb-1 text-sm font-medium">{update.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{update.summary}</p>
                     </div>
-                    <p className="mb-1 text-sm font-medium">{update.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{update.summary}</p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </Card>
 
