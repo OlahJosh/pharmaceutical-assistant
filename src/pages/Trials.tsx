@@ -47,9 +47,7 @@ export default function Trials() {
   const [selectedTrials, setSelectedTrials] = useState<string[]>([]);
   const { trialsData, comparisonData, isLoading, isComparing, fetchTrials, compareTrials } = useTrials();
 
-  useEffect(() => {
-    fetchTrials();
-  }, []);
+  // Remove auto-fetch on mount - we have default data now
 
   const trials = trialsData?.trials || [];
 
