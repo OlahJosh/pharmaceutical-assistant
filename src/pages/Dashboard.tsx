@@ -48,7 +48,7 @@ export default function Dashboard() {
 
       <main className="container mx-auto px-4 pb-12 pt-24">
         {/* Page Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in-up">
           <h1 className="font-display text-3xl font-bold">Dashboard Overview</h1>
           <p className="text-muted-foreground">
             Real-time intelligence across all agents
@@ -57,12 +57,12 @@ export default function Dashboard() {
 
         {/* Summary Stats */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {summaryStats.map((stat) => (
+          {summaryStats.map((stat, index) => (
             <Card
               key={stat.label}
-              className="glass-card flex items-center gap-4 p-5"
+              className={`glass-card flex items-center gap-4 p-5 hover-lift animate-fade-in-up stagger-${index + 1}`}
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary animate-float">
                 {stat.icon}
               </div>
               <div>
@@ -78,7 +78,7 @@ export default function Dashboard() {
 
         {/* Agent Cards Grid */}
         <div className="mb-8">
-          <h2 className="mb-4 font-display text-xl font-semibold">Agent Status</h2>
+          <h2 className="mb-4 font-display text-xl font-semibold animate-fade-in">Agent Status</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <AgentCard
               title="Orchestrator"
@@ -135,7 +135,7 @@ export default function Dashboard() {
 
           {/* Quick Actions / Pipeline Summary */}
           <div className="space-y-6">
-            <Card className="glass-card p-6">
+            <Card className="glass-card p-6 animate-fade-in-right stagger-1 hover-glow">
               <h3 className="mb-4 font-display text-lg font-semibold">Pipeline Summary</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -186,7 +186,7 @@ export default function Dashboard() {
               </div>
             </Card>
 
-            <Card className="glass-card p-6">
+            <Card className="glass-card p-6 animate-fade-in-right stagger-2 hover-glow">
               <h3 className="mb-4 font-display text-lg font-semibold">Upcoming Deadlines</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 rounded-lg bg-rose-500/10 p-3">
