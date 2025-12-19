@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Bell, Shield, Palette, Monitor } from "lucide-react";
+import { User, Bell, Shield, Palette, Sun, Moon, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/hooks/use-theme";
 
 interface SettingsModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(true);
@@ -136,16 +138,35 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Theme</Label>
-                <Select defaultValue="dark">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    variant={theme === "light" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => setTheme("light")}
+                  >
+                    <Sun className="h-4 w-4" />
+                    Light
+                  </Button>
+                  <Button
+                    variant={theme === "dark" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => setTheme("dark")}
+                  >
+                    <Moon className="h-4 w-4" />
+                    Dark
+                  </Button>
+                  <Button
+                    variant={theme === "system" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => setTheme("system")}
+                  >
+                    <Monitor className="h-4 w-4" />
+                    System
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Default Dashboard View</Label>
