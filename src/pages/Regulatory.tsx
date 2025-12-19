@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, Send, AlertCircle, CheckCircle, Clock, FileText, Sparkles } from "lucide-react";
+import { Shield, Send, AlertCircle, CheckCircle, Clock, FileText, Loader2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useComplianceItems } from "@/hooks/use-compliance-items";
 
 const regulatoryUpdates = [
   {
@@ -44,17 +45,6 @@ const regulatoryUpdates = [
   },
 ];
 
-const complianceChecklist = [
-  { id: "1", item: "GMP facility certification current", status: "complete" },
-  { id: "2", item: "Annual product quality review submitted", status: "complete" },
-  { id: "3", item: "Deviation reports up to date", status: "pending" },
-  { id: "4", item: "Training records verified", status: "complete" },
-  { id: "5", item: "Supplier qualification audits scheduled", status: "pending" },
-  { id: "6", item: "Change control procedures reviewed", status: "complete" },
-  { id: "7", item: "Stability testing protocols current", status: "complete" },
-  { id: "8", item: "Adverse event reporting compliant", status: "complete" },
-];
-
 const sampleQuestions = [
   "What are the key differences between FDA and EMA requirements for CAR-T therapies?",
   "Summarize the latest ICH E6(R3) GCP guideline changes",
@@ -67,7 +57,7 @@ interface Message {
 }
 
 export default function Regulatory() {
-  const { toast } = useToast();
+  const { items: complianceItems, isLoading: checklistLoading, toggleStatus, completeCount, totalCount } = useComplianceItems();
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -151,13 +141,6 @@ export default function Regulatory() {
 
   const handleQuickQuestion = (question: string) => {
     setQuery(question);
-  };
-
-  const handleChecklistToggle = (id: string) => {
-    toast({
-      title: "Checklist Updated",
-      description: "Compliance item status has been saved.",
-    });
   };
 
   return (
@@ -301,40 +284,48 @@ export default function Regulatory() {
                 <h3 className="font-display text-lg font-semibold">Compliance Checklist</h3>
               </div>
               <div className="space-y-3">
-                {complianceChecklist.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-secondary/30"
-                  >
-                    <Checkbox
-                      id={item.id}
-                      checked={item.status === "complete"}
-                      onCheckedChange={() => handleChecklistToggle(item.id)}
-                      className="mt-0.5"
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={item.id}
-                        className={`text-sm ${
-                          item.status === "complete"
-                            ? "text-muted-foreground line-through"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {item.item}
-                      </label>
+                {checklistLoading ? (
+                  <>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </>
+                ) : (
+                  complianceItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start gap-3 rounded-lg p-2 transition-colors hover:bg-secondary/30"
+                    >
+                      <Checkbox
+                        id={item.id}
+                        checked={item.status === "complete"}
+                        onCheckedChange={() => toggleStatus(item.id, item.status)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor={item.id}
+                          className={`text-sm cursor-pointer ${
+                            item.status === "complete"
+                              ? "text-muted-foreground line-through"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {item.item}
+                        </label>
+                      </div>
+                      {item.status === "complete" ? (
+                        <CheckCircle className="h-4 w-4 text-emerald-400" />
+                      ) : (
+                        <Clock className="h-4 w-4 text-amber-400" />
+                      )}
                     </div>
-                    {item.status === "complete" ? (
-                      <CheckCircle className="h-4 w-4 text-emerald-400" />
-                    ) : (
-                      <Clock className="h-4 w-4 text-amber-400" />
-                    )}
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
               <div className="mt-4 rounded-lg bg-secondary/50 p-3">
                 <p className="text-sm">
-                  <span className="font-medium text-emerald-400">6/8</span>
+                  <span className="font-medium text-emerald-400">{completeCount}/{totalCount}</span>
                   <span className="text-muted-foreground"> items complete</span>
                 </p>
               </div>
