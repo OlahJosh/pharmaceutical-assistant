@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Shield, AlertCircle, CheckCircle, Clock, FileText, Search, Filter, Globe } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Shield, AlertCircle, CheckCircle, Clock, FileText, Search, Filter, RefreshCw, Loader2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,49 +9,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useComplianceItems } from "@/hooks/use-compliance-items";
 import { useChat } from "@/hooks/use-chat";
 import { ChatSidebar } from "@/components/regulatory/ChatSidebar";
 import { ChatMessage } from "@/components/regulatory/ChatMessage";
 import { ChatInput } from "@/components/regulatory/ChatInput";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-
-const regulatoryUpdates = [
-  {
-    id: "1",
-    title: "FDA Updates CAR-T Manufacturing Guidelines",
-    agency: "FDA",
-    date: "Dec 15, 2024",
-    priority: "high",
-    summary: "New quality control requirements for viral vector production in CAR-T cell therapies",
-  },
-  {
-    id: "2",
-    title: "EMA Revises Clinical Trial Application Process",
-    agency: "EMA",
-    date: "Dec 12, 2024",
-    priority: "medium",
-    summary: "Streamlined submission pathway for first-in-human studies with enhanced safety monitoring",
-  },
-  {
-    id: "3",
-    title: "ICH E6(R3) GCP Guidelines Published",
-    agency: "ICH",
-    date: "Dec 10, 2024",
-    priority: "high",
-    summary: "Major revision to Good Clinical Practice guidelines with focus on risk-based monitoring",
-  },
-  {
-    id: "4",
-    title: "PMDA Announces New Accelerated Approval Criteria",
-    agency: "PMDA",
-    date: "Dec 8, 2024",
-    priority: "medium",
-    summary: "Japan expands conditional approval pathway for breakthrough therapies",
-  },
-];
+import { defaultRegulatoryUpdates } from "@/data/default-data";
 
 const sampleQuestions = [
   "What are the key differences between FDA and EMA requirements for CAR-T therapies?",
@@ -60,14 +23,7 @@ const sampleQuestions = [
   "Explain 21 CFR Part 211 requirements",
 ];
 
-const agencies = ["All Agencies", "FDA", "EMA", "ICH", "PMDA"];
-const languages = [
-  { code: "en", name: "English" },
-  { code: "es", name: "Español" },
-  { code: "fr", name: "Français" },
-  { code: "de", name: "Deutsch" },
-  { code: "ja", name: "日本語" },
-];
+const agencies = ["All Agencies", "FDA", "EMA", "ICH", "PMDA", "WHO", "MHRA", "HC"];
 
 export default function Regulatory() {
   const { items: complianceItems, isLoading: checklistLoading, toggleStatus, completeCount, totalCount } = useComplianceItems();
@@ -86,9 +42,8 @@ export default function Regulatory() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgency, setSelectedAgency] = useState("All Agencies");
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [regulatoryUpdates, setRegulatoryUpdates] = useState(defaultRegulatoryUpdates);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
   // Fetch conversations on mount
   useEffect(() => {
@@ -113,14 +68,6 @@ export default function Regulatory() {
     sendMessage(question, []);
   };
 
-  const handleLanguageChange = (code: string) => {
-    setSelectedLanguage(code);
-    toast({
-      title: "Language Updated",
-      description: `Interface language set to ${languages.find(l => l.code === code)?.name}`,
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -134,33 +81,10 @@ export default function Regulatory() {
               AI-powered guidance on FDA, EMA, and GMP requirements
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Globe className="h-4 w-4" />
-                  {languages.find(l => l.code === selectedLanguage)?.name}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={selectedLanguage === lang.code ? "bg-primary/20" : ""}
-                  >
-                    {lang.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Badge className="agent-badge-regulatory border">
-              <Shield className="mr-1.5 h-3.5 w-3.5" />
-              Regulatory Agent Active
-            </Badge>
-          </div>
+          <Badge className="agent-badge-regulatory border w-fit">
+            <Shield className="mr-1.5 h-3.5 w-3.5" />
+            Regulatory Agent Active
+          </Badge>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -285,40 +209,45 @@ export default function Regulatory() {
 
             {/* Recent Updates */}
             <Card className="glass-card p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-rose-400" />
-                <h3 className="font-display text-lg font-semibold">Recent Updates</h3>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-rose-400" />
+                  <h3 className="font-display text-lg font-semibold">Recent Updates</h3>
+                </div>
+                <Badge variant="secondary">{filteredUpdates.length}</Badge>
               </div>
-              <div className="space-y-3">
-                {filteredUpdates.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No updates match your filters
-                  </p>
-                ) : (
-                  filteredUpdates.map((update) => (
-                    <div
-                      key={update.id}
-                      className="rounded-lg border border-border/50 p-3 transition-colors hover:bg-secondary/30 cursor-pointer"
-                    >
-                      <div className="mb-1 flex items-start justify-between gap-2">
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${
-                            update.priority === "high"
-                              ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                              : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-                          }`}
-                        >
-                          {update.agency}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{update.date}</span>
+              <ScrollArea className="h-[280px]">
+                <div className="space-y-3 pr-2">
+                  {filteredUpdates.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No updates match your filters
+                    </p>
+                  ) : (
+                    filteredUpdates.map((update) => (
+                      <div
+                        key={update.id}
+                        className="rounded-lg border border-border/50 p-3 transition-colors hover:bg-secondary/30 cursor-pointer"
+                      >
+                        <div className="mb-1 flex items-start justify-between gap-2">
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${
+                              update.priority === "high"
+                                ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                                : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                            }`}
+                          >
+                            {update.agency}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{update.date}</span>
+                        </div>
+                        <p className="mb-1 text-sm font-medium">{update.title}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{update.summary}</p>
                       </div>
-                      <p className="mb-1 text-sm font-medium">{update.title}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{update.summary}</p>
-                    </div>
-                  ))
-                )}
-              </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
             </Card>
 
             {/* Compliance Checklist */}
