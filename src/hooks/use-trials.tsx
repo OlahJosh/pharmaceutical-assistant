@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/use-notifications";
 import { defaultTrials } from "@/data/default-data";
 
 export interface Trial {
@@ -40,6 +41,7 @@ export function useTrials() {
   const [isLoading, setIsLoading] = useState(false);
   const [isComparing, setIsComparing] = useState(false);
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
 
   const fetchTrials = useCallback(async () => {
     setIsLoading(true);
@@ -49,15 +51,24 @@ export function useTrials() {
       if (error) throw error;
 
       // Merge new trials with existing, avoiding duplicates
-      setTrialsData((prev) => {
-        const existingIds = new Set(prev.trials.map(t => t.id));
-        const newTrials = responseData.trials?.filter((t: Trial) => !existingIds.has(t.id)) || [];
-        return { trials: [...prev.trials, ...newTrials] };
-      });
+      const existingIds = new Set(trialsData.trials.map(t => t.id));
+      const newTrials = responseData.trials?.filter((t: Trial) => !existingIds.has(t.id)) || [];
+      
+      if (newTrials.length > 0) {
+        setTrialsData((prev) => ({ trials: [...prev.trials, ...newTrials] }));
+        
+        // Push real-time notification for new trials
+        addNotification({
+          type: "trial",
+          title: "New Clinical Trials Detected",
+          description: `${newTrials.length} new trials added to your monitoring list`,
+          agent: "Clinical",
+        });
+      }
       
       toast({
         title: "Trials Updated",
-        description: `Added ${responseData.trials?.length || 0} new clinical trials`,
+        description: `Added ${newTrials.length} new clinical trials`,
       });
     } catch (error) {
       console.error("Error fetching trials:", error);
@@ -69,7 +80,7 @@ export function useTrials() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, addNotification, trialsData.trials]);
 
   const compareTrials = useCallback(async (trials: Trial[]) => {
     if (trials.length < 2) return;

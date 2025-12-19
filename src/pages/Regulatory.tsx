@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useComplianceItems } from "@/hooks/use-compliance-items";
 import { useChat } from "@/hooks/use-chat";
+import { useNotifications } from "@/hooks/use-notifications";
 import { ChatSidebar } from "@/components/regulatory/ChatSidebar";
 import { ChatMessage } from "@/components/regulatory/ChatMessage";
 import { ChatInput } from "@/components/regulatory/ChatInput";

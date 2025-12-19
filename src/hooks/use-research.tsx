@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/use-notifications";
 
 interface ResearchPaper {
   id: string;
@@ -31,6 +32,7 @@ export function useResearch() {
   const [data, setData] = useState<ResearchData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
 
   const fetchResearch = useCallback(async (query?: string) => {
     setIsLoading(true);
@@ -42,6 +44,27 @@ export function useResearch() {
       if (error) throw error;
 
       setData(responseData);
+      
+      // Push real-time notification for research updates
+      if (responseData.papers?.length > 0) {
+        const trendingPaper = responseData.papers.find((p: ResearchPaper) => p.trending);
+        if (trendingPaper) {
+          addNotification({
+            type: "insight",
+            title: "New Trending Research",
+            description: `"${trendingPaper.title.slice(0, 60)}..." is trending`,
+            agent: "Research",
+          });
+        } else {
+          addNotification({
+            type: "insight",
+            title: "Research Updated",
+            description: `${responseData.papers.length} new papers found matching your criteria`,
+            agent: "Research",
+          });
+        }
+      }
+
       toast({
         title: "Research Updated",
         description: `Loaded ${responseData.papers?.length || 0} papers from AI intelligence`,
@@ -56,7 +79,7 @@ export function useResearch() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, addNotification]);
 
   return { data, isLoading, fetchResearch };
 }

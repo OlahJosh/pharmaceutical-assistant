@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
+import { useNotifications } from "@/hooks/use-notifications";
 import NotificationsPanel from "./NotificationsPanel";
 import SettingsModal from "./SettingsModal";
 
@@ -28,10 +29,10 @@ export default function Header() {
   const location = useLocation();
   const { toast } = useToast();
   const { profile } = useProfile();
+  const { unreadCount, markAllRead } = useNotifications();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
   // Get display name from profile
   const displayName = profile?.first_name && profile?.last_name 
@@ -40,7 +41,7 @@ export default function Header() {
   const role = profile?.role || "User";
 
   const handleMarkAllRead = () => {
-    setUnreadCount(0);
+    markAllRead();
     toast({
       title: "Notifications cleared",
       description: "All notifications marked as read",
