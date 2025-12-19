@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Bell, Settings, User, Globe, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/use-profile";
 import NotificationsPanel from "./NotificationsPanel";
 import SettingsModal from "./SettingsModal";
 
@@ -23,27 +24,26 @@ const navLinks = [
   { path: "/insights", label: "Insights" },
 ];
 
-const languages = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "zh", label: "中文" },
-];
-
 export default function Header() {
   const location = useLocation();
   const { toast } = useToast();
+  const { profile } = useProfile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("en");
+  const [unreadCount, setUnreadCount] = useState(3);
 
-  const handleLanguageChange = (code: string, label: string) => {
-    setCurrentLang(code);
+  // Get display name from profile
+  const displayName = profile?.first_name && profile?.last_name 
+    ? `${profile.first_name} ${profile.last_name}` 
+    : profile?.first_name || profile?.email || "User";
+  const role = profile?.role || "User";
+
+  const handleMarkAllRead = () => {
+    setUnreadCount(0);
     toast({
-      title: "Language Changed",
-      description: `Interface language set to ${label}`,
+      title: "Notifications cleared",
+      description: "All notifications marked as read",
     });
   };
 
@@ -93,9 +93,11 @@ export default function Header() {
                 onClick={() => setNotificationsOpen(true)}
               >
                 <Bell className="h-5 w-5" />
-                <Badge className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-primary p-0 text-xs">
-                  3
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-primary p-0 text-xs">
+                    {unreadCount}
+                  </Badge>
+                )}
               </Button>
 
               {/* Settings */}
@@ -114,16 +116,16 @@ export default function Header() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
                       <User className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="hidden text-sm font-medium sm:inline">Dr. Sarah Chen</span>
+                    <span className="hidden text-sm font-medium sm:inline">{displayName}</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
-                      <span>Dr. Sarah Chen</span>
+                      <span>{displayName}</span>
                       <span className="text-xs font-normal text-muted-foreground">
-                        Research Director
+                        {role}
                       </span>
                     </div>
                   </DropdownMenuLabel>
@@ -132,7 +134,7 @@ export default function Header() {
                     <User className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                     <Settings className="mr-2 h-4 w-4" />
                     Preferences
                   </DropdownMenuItem>
@@ -177,7 +179,11 @@ export default function Header() {
         </div>
       </header>
 
-      <NotificationsPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      <NotificationsPanel 
+        open={notificationsOpen} 
+        onClose={() => setNotificationsOpen(false)} 
+        onMarkAllRead={handleMarkAllRead}
+      />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   );

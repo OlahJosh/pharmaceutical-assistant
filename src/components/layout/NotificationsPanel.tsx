@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X, AlertCircle, TrendingUp, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
 interface NotificationsPanelProps {
   open: boolean;
   onClose: () => void;
+  onMarkAllRead: () => void;
 }
 
 const notifications = [
@@ -88,22 +90,34 @@ const getAgentBadgeClass = (agent: string) => {
   }
 };
 
-export default function NotificationsPanel({ open, onClose }: NotificationsPanelProps) {
+export default function NotificationsPanel({ open, onClose, onMarkAllRead }: NotificationsPanelProps) {
+  const [notificationList, setNotificationList] = useState(notifications);
+  
+  const unreadCount = notificationList.filter(n => n.unread).length;
+
+  const handleMarkAllRead = () => {
+    setNotificationList(prev => prev.map(n => ({ ...n, unread: false })));
+    onMarkAllRead();
+    onClose();
+  };
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full border-l border-border/50 bg-card/95 backdrop-blur-xl sm:max-w-md">
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-display text-lg">Notifications</SheetTitle>
-            <Badge variant="secondary" className="bg-primary/20 text-primary">
-              3 new
-            </Badge>
+            {unreadCount > 0 && (
+              <Badge variant="secondary" className="bg-primary/20 text-primary">
+                {unreadCount} new
+              </Badge>
+            )}
           </div>
         </SheetHeader>
 
         <ScrollArea className="h-[calc(100vh-120px)]">
           <div className="space-y-3 pr-4">
-            {notifications.map((notification) => (
+            {notificationList.map((notification) => (
               <div
                 key={notification.id}
                 className={`group relative rounded-lg border p-4 transition-colors ${
@@ -147,7 +161,7 @@ export default function NotificationsPanel({ open, onClose }: NotificationsPanel
         </ScrollArea>
 
         <div className="absolute bottom-0 left-0 right-0 border-t border-border/50 bg-card/95 p-4">
-          <Button variant="outline" className="w-full" onClick={onClose}>
+          <Button variant="outline" className="w-full" onClick={handleMarkAllRead}>
             Mark all as read
           </Button>
         </div>
