@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Settings, User, Globe, ChevronDown, Menu, X } from "lucide-react";
+import { Bell, Settings, User, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useNotifications } from "@/hooks/use-notifications";
 import NotificationsPanel from "./NotificationsPanel";
 import SettingsModal from "./SettingsModal";
+import LanguageSelector from "./LanguageSelector";
 
 const navLinks = [
   { path: "/dashboard", label: "Dashboard" },
@@ -91,8 +92,7 @@ export default function Header() {
             {/* Right Actions */}
             <div className="flex items-center gap-2">
               {/* Language Selector */}
-              {/* Google Translate Widget */}
-              <div id="google_translate_element" className="hidden sm:block"></div>
+              <LanguageSelector />
 
               {/* Notifications */}
               <Button
