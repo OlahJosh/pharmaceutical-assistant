@@ -25,6 +25,10 @@ export function useProfile() {
 
   const fetchProfile = useCallback(async () => {
     try {
+      // Check if in demo mode
+      const isDemoMode = localStorage.getItem("demo_mode") === "true";
+      const demoRole = localStorage.getItem("demo_role");
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -32,7 +36,13 @@ export function useProfile() {
         .single();
 
       if (error && error.code !== "PGRST116") throw error;
-      setProfile(data);
+      
+      // If in demo mode, override role with demo role
+      if (isDemoMode && demoRole && data) {
+        setProfile({ ...data, role: demoRole });
+      } else {
+        setProfile(data);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
