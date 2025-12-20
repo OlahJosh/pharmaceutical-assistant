@@ -726,8 +726,8 @@
   /* Insights Panel */
   .insights-panel {
     position: absolute;
-    bottom: 10px;
-    left: 50%;
+    bottom: 60px;
+    left: 30%;
     transform: translateX(-50%);
     width: 200px;
     padding: 12px;
