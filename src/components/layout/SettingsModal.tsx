@@ -200,7 +200,21 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Input id="role" defaultValue={profile?.role || "User"} disabled />
+                <Select value={profile?.role || "Regulatory Affairs Manager"} disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Regulatory Affairs Manager">Regulatory Affairs Manager</SelectItem>
+                    <SelectItem value="Clinical Operations Director">Clinical Operations Director</SelectItem>
+                    <SelectItem value="Pharmacovigilance Officer">Pharmacovigilance Officer</SelectItem>
+                    <SelectItem value="Quality Assurance Lead">Quality Assurance Lead</SelectItem>
+                    <SelectItem value="Medical Science Liaison">Medical Science Liaison</SelectItem>
+                    <SelectItem value="R&D Director">R&D Director</SelectItem>
+                    <SelectItem value="Compliance Officer">Compliance Officer</SelectItem>
+                    <SelectItem value="Clinical Data Manager">Clinical Data Manager</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </TabsContent>
