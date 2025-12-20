@@ -49,6 +49,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
   const [weeklyDigest, setWeeklyDigest] = useState(true);
   const [defaultView, setDefaultView] = useState("overview");
   const [refreshInterval, setRefreshInterval] = useState("30");
+  const [role, setRole] = useState("Regulatory Affairs Manager");
 
   useEffect(() => {
     if (open) setActiveTab(initialTab);
@@ -65,6 +66,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
       setWeeklyDigest(!!profile.weekly_digest);
       setDefaultView(profile.default_view || "overview");
       setRefreshInterval(String(profile.refresh_interval || 30));
+      setRole(profile.role || "Regulatory Affairs Manager");
     }
   }, [profile]);
 
@@ -115,6 +117,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
       last_name: lastName,
       email: email,
       avatar_url: avatarUrl,
+      role: role,
       email_notifications: emailNotifications,
       alerts_enabled: alertsEnabled,
       weekly_digest: weeklyDigest,
@@ -200,7 +203,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
-                <Select value={profile?.role || "Regulatory Affairs Manager"} disabled>
+                <Select value={role} onValueChange={setRole}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
