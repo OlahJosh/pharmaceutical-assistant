@@ -1,6 +1,7 @@
 import { AlertCircle, TrendingUp, FileText, Zap, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface Insight {
   id: string;
@@ -86,8 +87,8 @@ export default function InsightFeed() {
       <div className="border-b border-border/50 p-4">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-lg font-semibold">Latest Insights</h3>
-          <Button variant="ghost" size="sm" className="gap-1 text-primary">
-            View All <ArrowRight className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="gap-1 text-primary" asChild>
+            <Link to="/insights">View All <ArrowRight className="h-4 w-4" /></Link>
           </Button>
         </div>
       </div>
