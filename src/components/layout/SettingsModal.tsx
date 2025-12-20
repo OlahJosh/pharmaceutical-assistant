@@ -25,13 +25,18 @@ import { useProfile } from "@/hooks/use-profile";
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: "profile" | "notifications" | "preferences" | "security";
 }
 
-export default function SettingsModal({ open, onClose }: SettingsModalProps) {
+export default function SettingsModal({ open, onClose, initialTab = "profile" }: SettingsModalProps) {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { profile, updateProfile } = useProfile();
-  
+
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "notifications" | "preferences" | "security"
+  >(initialTab);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,13 +47,17 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [refreshInterval, setRefreshInterval] = useState("30");
 
   useEffect(() => {
+    if (open) setActiveTab(initialTab);
+  }, [open, initialTab]);
+
+  useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || "");
       setLastName(profile.last_name || "");
       setEmail(profile.email || "");
-      setEmailNotifications(profile.email_notifications);
-      setAlertsEnabled(profile.alerts_enabled);
-      setWeeklyDigest(profile.weekly_digest);
+      setEmailNotifications(!!profile.email_notifications);
+      setAlertsEnabled(!!profile.alerts_enabled);
+      setWeeklyDigest(!!profile.weekly_digest);
       setDefaultView(profile.default_view || "overview");
       setRefreshInterval(String(profile.refresh_interval || 30));
     }
@@ -75,7 +84,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
           <DialogTitle className="font-display text-xl">Settings</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="profile" className="mt-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="mt-4">
           <TabsList className="grid w-full grid-cols-4 bg-secondary/50">
             <TabsTrigger value="profile" className="gap-2 text-xs sm:text-sm">
               <User className="h-4 w-4" />
@@ -197,7 +206,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
               </div>
               <div className="space-y-2">
                 <Label>Default Dashboard View</Label>
-                <Select defaultValue="overview">
+                <Select value={defaultView} onValueChange={setDefaultView}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -210,7 +219,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
               </div>
               <div className="space-y-2">
                 <Label>Data Refresh Interval</Label>
-                <Select defaultValue="30">
+                <Select value={refreshInterval} onValueChange={setRefreshInterval}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

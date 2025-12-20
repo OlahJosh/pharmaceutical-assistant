@@ -15,6 +15,8 @@ interface Profile {
   refresh_interval: number;
 }
 
+type ProfileUpdatedEvent = CustomEvent<Partial<Profile> & { id?: string }>;
+
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,12 +25,12 @@ export function useProfile() {
   const fetchProfile = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
+        .from("profiles")
+        .select("*")
         .limit(1)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== "PGRST116") throw error;
       setProfile(data);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -37,28 +39,61 @@ export function useProfile() {
     }
   }, []);
 
-  const updateProfile = useCallback(async (updates: Partial<Profile>) => {
-    if (!profile?.id) return;
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', profile.id);
+  const updateProfile = useCallback(
+    async (updates: Partial<Profile>) => {
+      if (!profile?.id) return;
 
-      if (error) throw error;
-      
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
-      toast({ title: "Settings Saved", description: "Your preferences have been updated." });
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" });
-    }
-  }, [profile?.id, toast]);
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update(updates)
+          .eq("id", profile.id);
+
+        if (error) throw error;
+
+        const next = { ...profile, ...updates };
+        setProfile(next);
+
+        // Notify other hook instances (e.g., Header vs SettingsModal) to update immediately.
+        window.dispatchEvent(
+          new CustomEvent("profile:updated", { detail: { id: profile.id, ...updates } })
+        );
+
+        toast({
+          title: "Settings Saved",
+          description: "Your preferences have been updated.",
+        });
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save settings.",
+          variant: "destructive",
+        });
+      }
+    },
+    [profile, toast]
+  );
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const e = event as ProfileUpdatedEvent;
+      const updates = e.detail ?? {};
+
+      setProfile((prev) => {
+        if (!prev) return prev;
+        if (updates.id && updates.id !== prev.id) return prev;
+        return { ...prev, ...updates };
+      });
+    };
+
+    window.addEventListener("profile:updated", handler);
+    return () => window.removeEventListener("profile:updated", handler);
+  }, []);
 
   return { profile, isLoading, updateProfile, refetch: fetchProfile };
 }

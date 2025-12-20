@@ -33,12 +33,20 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<
+    "profile" | "notifications" | "preferences" | "security"
+  >("profile");
 
   // Get display name from profile
-  const displayName = profile?.first_name && profile?.last_name 
-    ? `${profile.first_name} ${profile.last_name}` 
+  const displayName = profile?.first_name && profile?.last_name
+    ? `${profile.first_name} ${profile.last_name}`
     : profile?.first_name || profile?.email || "User";
   const role = profile?.role || "User";
+
+  const openSettings = (tab: "profile" | "notifications" | "preferences" | "security") => {
+    setSettingsTab(tab);
+    setSettingsOpen(true);
+  };
 
   const handleMarkAllRead = () => {
     markAllRead();
@@ -105,7 +113,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setSettingsOpen(true)}
+                onClick={() => openSettings("profile")}
               >
                 <Settings className="h-5 w-5" />
               </Button>
@@ -131,11 +139,11 @@ export default function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
+                  <DropdownMenuItem onClick={() => openSettings("profile")}>
                     <User className="mr-2 h-4 w-4" />
                     Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
+                  <DropdownMenuItem onClick={() => openSettings("preferences")}>
                     <Settings className="mr-2 h-4 w-4" />
                     Preferences
                   </DropdownMenuItem>
@@ -180,12 +188,16 @@ export default function Header() {
         </div>
       </header>
 
-      <NotificationsPanel 
-        open={notificationsOpen} 
-        onClose={() => setNotificationsOpen(false)} 
+      <NotificationsPanel
+        open={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
         onMarkAllRead={handleMarkAllRead}
       />
-      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        initialTab={settingsTab}
+      />
     </>
   );
 }
