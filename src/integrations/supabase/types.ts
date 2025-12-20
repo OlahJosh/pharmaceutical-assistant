@@ -100,6 +100,7 @@ export type Database = {
       profiles: {
         Row: {
           alerts_enabled: boolean | null
+          avatar_url: string | null
           created_at: string
           default_view: string | null
           email: string | null
@@ -115,6 +116,7 @@ export type Database = {
         }
         Insert: {
           alerts_enabled?: boolean | null
+          avatar_url?: string | null
           created_at?: string
           default_view?: string | null
           email?: string | null
@@ -130,6 +132,7 @@ export type Database = {
         }
         Update: {
           alerts_enabled?: boolean | null
+          avatar_url?: string | null
           created_at?: string
           default_view?: string | null
           email?: string | null

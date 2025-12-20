@@ -13,6 +13,7 @@ interface Profile {
   weekly_digest: boolean;
   default_view: string;
   refresh_interval: number;
+  avatar_url: string | null;
 }
 
 type ProfileUpdatedEvent = CustomEvent<Partial<Profile> & { id?: string }>;

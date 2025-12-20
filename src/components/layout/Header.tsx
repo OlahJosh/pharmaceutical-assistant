@@ -122,8 +122,12 @@ export default function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-                      <User className="h-4 w-4 text-primary" />
+                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/20">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-4 w-4 text-primary" />
+                      )}
                     </div>
                     <span className="hidden text-sm font-medium sm:inline">{displayName}</span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />

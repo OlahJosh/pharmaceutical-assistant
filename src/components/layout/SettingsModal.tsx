@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { User, Bell, Shield, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { User, Bell, Shield, Palette, Sun, Moon, Monitor, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/hooks/use-theme";
 import { useProfile } from "@/hooks/use-profile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SettingsModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { profile, updateProfile } = useProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<
     "profile" | "notifications" | "preferences" | "security"
@@ -40,6 +42,8 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(true);
@@ -55,6 +59,7 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
       setFirstName(profile.first_name || "");
       setLastName(profile.last_name || "");
       setEmail(profile.email || "");
+      setAvatarUrl(profile.avatar_url || null);
       setEmailNotifications(!!profile.email_notifications);
       setAlertsEnabled(!!profile.alerts_enabled);
       setWeeklyDigest(!!profile.weekly_digest);
@@ -63,11 +68,53 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
     }
   }, [profile]);
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !profile?.id) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please upload an image smaller than 2MB.", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${profile.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+      toast({ title: "Avatar uploaded", description: "Your profile picture has been updated." });
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      toast({ title: "Upload failed", description: "Could not upload avatar.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     await updateProfile({
       first_name: firstName,
       last_name: lastName,
       email: email,
+      avatar_url: avatarUrl,
       email_notifications: emailNotifications,
       alerts_enabled: alertsEnabled,
       weekly_digest: weeklyDigest,
@@ -106,12 +153,35 @@ export default function SettingsModal({ open, onClose, initialTab = "profile" }:
 
           <TabsContent value="profile" className="mt-6 space-y-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/20">
-                <User className="h-10 w-10 text-primary" />
+              <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-primary/20">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-10 w-10 text-primary" />
+                )}
               </div>
               <div>
-                <Button variant="outline" size="sm">
-                  Change Avatar
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    "Uploading..."
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Change Avatar
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
