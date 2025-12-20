@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Bell, Settings, User, ChevronDown, Menu, X, LogOut } from "lucide-react";
+import { Bell, Settings, User, ChevronDown, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,7 +32,6 @@ export default function Header() {
   const { toast } = useToast();
   const { profile } = useProfile();
   const { unreadCount, markAllRead } = useNotifications();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<
@@ -83,32 +82,44 @@ export default function Header() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20">
-                <div className="h-5 w-5 rounded-full bg-primary" />
-              </div>
-              <span className="font-display text-xl font-bold">
-                Pharma<span className="text-primary">Lens</span>
-              </span>
-            </Link>
+            {/* Hamburger Menu - Always visible */}
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48 bg-background">
+                  <DropdownMenuLabel>Navigation</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {navLinks.map((link) => (
+                    <DropdownMenuItem key={link.path} asChild>
+                      <Link
+                        to={link.path}
+                        className={`w-full ${
+                          location.pathname === link.path
+                            ? "text-primary font-medium"
+                            : ""
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden items-center gap-1 md:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`px-4 py-2 text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+              {/* Logo */}
+              <Link to="/" className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20">
+                  <div className="h-5 w-5 rounded-full bg-primary" />
+                </div>
+                <span className="font-display text-xl font-bold">
+                  Pharma<span className="text-primary">Lens</span>
+                </span>
+              </Link>
+            </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
@@ -154,7 +165,7 @@ export default function Header() {
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 bg-background">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
                       <span>{displayName}</span>
@@ -179,38 +190,8 @@ export default function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {/* Mobile Menu Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
             </div>
           </div>
-
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <nav className="border-t border-border/50 py-4 md:hidden">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-4 py-3 text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          )}
         </div>
       </header>
 

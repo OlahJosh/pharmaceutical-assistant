@@ -13,7 +13,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("pharmalens-theme") as Theme) || "light";
+      const stored = localStorage.getItem("pharmalens-theme") as Theme;
+      // Default to light if nothing stored
+      if (!stored) {
+        localStorage.setItem("pharmalens-theme", "light");
+        return "light";
+      }
+      return stored;
     }
     return "light";
   });
