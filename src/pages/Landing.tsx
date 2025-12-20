@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Brain, Search, FileText, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import HeroAnimation from "@/components/landing/HeroAnimation";
 
 const agents = [
   {
@@ -109,6 +110,11 @@ export default function Landing() {
                 <p className="font-display text-3xl font-bold text-primary">24/7</p>
                 <p className="text-sm text-muted-foreground">Continuous Monitoring</p>
               </div>
+            </div>
+
+            {/* Hero Animation */}
+            <div className="mt-20 fade-in stagger-5">
+              <HeroAnimation />
             </div>
           </div>
         </div>
