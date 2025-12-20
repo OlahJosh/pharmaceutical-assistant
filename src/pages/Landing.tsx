@@ -210,7 +210,7 @@ export default function Landing() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 PharmaLens. AI-Powered Healthcare Intelligence.
+              © 2025 PharmaLens. AI-Powered Healthcare Intelligence.
             </p>
           </div>
         </div>
