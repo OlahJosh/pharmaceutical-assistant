@@ -140,7 +140,7 @@ export default function HeroAnimation() {
         <path className="data-flow-line line-to-docs" d="M300,200 Q200,200 120,180" />
         <path className="data-flow-line line-to-compare" d="M300,200 Q400,150 480,100" />
         <path className="data-flow-line line-to-regulatory" d="M300,200 Q420,280 480,320" />
-        <path className="data-flow-line line-to-insights" d="M300,200 Q300,300 300,360" />
+        <path className="data-flow-line line-to-insights" d="M300,200 Q250,300 200,340" strokeDasharray="6 4" />
         
         {/* Animated particles */}
         <circle className="data-particle particle-1" r="3" fill="hsl(var(--primary))">
@@ -153,7 +153,7 @@ export default function HeroAnimation() {
           <animateMotion dur="2.2s" repeatCount="indefinite" path="M300,200 Q420,280 480,320" />
         </circle>
         <circle className="data-particle particle-4" r="3" fill="hsl(var(--primary))">
-          <animateMotion dur="1.8s" repeatCount="indefinite" path="M300,200 Q300,300 300,360" />
+          <animateMotion dur="1.8s" repeatCount="indefinite" path="M300,200 Q250,300 200,340" />
         </circle>
       </svg>
     </div>
