@@ -86,8 +86,8 @@ export default function Landing() {
             {/* CTA */}
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row fade-in stagger-3">
               <Button asChild size="xl" variant="hero" className="w-full sm:w-auto">
-                <Link to="/dashboard">
-                  Launch Dashboard
+                <Link to="/auth">
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -189,8 +189,8 @@ export default function Landing() {
             with AI-powered intelligence.
           </p>
           <Button asChild size="xl" variant="hero">
-            <Link to="/dashboard">
-              Explore the Dashboard
+            <Link to="/auth">
+              Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
