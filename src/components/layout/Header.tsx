@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Bell, Settings, User, ChevronDown, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, Settings, User, ChevronDown, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,7 @@ const navLinks = [
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useProfile();
   const { unreadCount, markAllRead } = useNotifications();
@@ -38,15 +39,35 @@ export default function Header() {
     "profile" | "notifications" | "preferences" | "security"
   >("profile");
 
-  // Get display name from profile
-  const displayName = profile?.first_name && profile?.last_name
-    ? `${profile.first_name} ${profile.last_name}`
-    : profile?.first_name || profile?.email || "User";
-  const role = profile?.role || "User";
+  // Check for demo mode name
+  const isDemoMode = localStorage.getItem("demo_mode") === "true";
+  const demoRole = localStorage.getItem("demo_role");
+
+  // Get display name - use "Demo User" for demo mode, or profile name
+  const displayName = isDemoMode 
+    ? "Demo User"
+    : profile?.first_name && profile?.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : profile?.first_name || profile?.email || "User";
+  
+  const role = isDemoMode && demoRole ? demoRole : (profile?.role || "User");
 
   const openSettings = (tab: "profile" | "notifications" | "preferences" | "security") => {
     setSettingsTab(tab);
     setSettingsOpen(true);
+  };
+
+  const handleSignOut = () => {
+    // Clear demo mode
+    localStorage.removeItem("demo_mode");
+    localStorage.removeItem("demo_role");
+    
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+    
+    navigate("/auth");
   };
 
   const handleMarkAllRead = () => {
@@ -152,7 +173,8 @@ export default function Header() {
                     Preferences
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
